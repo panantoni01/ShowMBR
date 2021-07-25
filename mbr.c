@@ -1,9 +1,9 @@
+#define _DEFAULT_SOURCE
+
 #include"wrappers.h"
 #include"mbr.h"
 #include"parttypes_map.h"
 
-#define STYLE_BOLD  "\033[1m"
-#define STYLE_NO_BOLD  "\033[22m"
 
 void hexdump_MBR(uint8_t buffer[MBR_SIZE]) {
     for (int i = 0; i < MBR_SIZE/ROW; i++) {
@@ -21,6 +21,15 @@ void hexdump_MBR(uint8_t buffer[MBR_SIZE]) {
     }
 }
 
+static void print_chs(struct chs* chs_struct) {
+    int c = (int)chs_struct->c + ((chs_struct->s & 0b11000000)<<2);
+    int h = (int)(chs_struct->h);
+    int s = (int)(chs_struct->s & 0b00111111);
+    printf("\tC = 0x%03x = %d\n", c, c);
+    printf("\tH = 0x%02x = %d\n", h, h);
+    printf("\tS = 0x%02x = %d\n", s, s);
+}
+
 void print_part(uint8_t buffer[MBR_SIZE], int num) {
     if (num < 0 || num > 3) { /* we have 4 partitions: part0 ... part3 */
         fprintf(stderr, "ERROR: wrong partition number\n");
@@ -35,7 +44,7 @@ void print_part(uint8_t buffer[MBR_SIZE], int num) {
     printf("Partition no. %d:\n", num);
     printf(STYLE_NO_BOLD);
 
-    printf("boot flag is 0x%02x - ", (int)curr_entry->part_status);
+    printf("Boot flag is 0x%02x - ", (int)curr_entry->part_status);
     if (curr_entry->part_status == 0x80)
         printf("active (bootable) partition\n");
     else if (curr_entry->part_status == 0x0)
@@ -43,5 +52,15 @@ void print_part(uint8_t buffer[MBR_SIZE], int num) {
     else
         printf("invalid boot flag\n");
 
-    printf("partition type is 0x%02x - %s\n", curr_entry->part_type, find_parttype_by_hex(curr_entry->part_type));
+    printf("Partition type is 0x%02x - %s\n", curr_entry->part_type, find_parttype_by_hex(curr_entry->part_type));
+
+    printf("CHS address of the first sector of partition:\n");
+    print_chs(&(curr_entry->chs_first));
+    printf("CHS address of the last sector of partition:\n");
+    print_chs(&(curr_entry->chs_last));
+
+    printf("LBA of the first partition sector: 0x%08x = %u\n", 
+        le32toh(curr_entry->lba_first), le32toh(curr_entry->lba_first));
+    printf("Number of sectors in the partition: 0x%08x = %u\n", 
+        le32toh(curr_entry->sectors_count), le32toh(curr_entry->sectors_count));
 }

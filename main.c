@@ -3,7 +3,6 @@
 #include<stdint.h>
 #include"wrappers.h"
 #include"mbr.h"
-#include"parttypes_map.h"
 
 
 int main(int argc, char* argv[]) {
@@ -21,13 +20,14 @@ int main(int argc, char* argv[]) {
     hexdump_MBR(mbr_content);
     
     if (mbr_content[510] != 0x55 || mbr_content[511] != 0xAA)
-        printf("WARNING: incorrect boot signature: [%02x %02x]\n", mbr_content[510], mbr_content[511]);
+        printf("\nWARNING: incorrect boot signature: [%02x %02x]\n", mbr_content[510], mbr_content[511]);
     else
-        printf("Correct boot signature: [%02x %02x]\n", mbr_content[510], mbr_content[511]);
+        printf("\nCorrect boot signature: [%02x %02x]\n", mbr_content[510], mbr_content[511]);
 
-    init_part_map();
-    print_part(mbr_content, 0);
-    print_part(mbr_content, 1);
-    
+    for (int i = 0; i <= 3; i++) {
+        putchar('\n');
+        print_part(mbr_content, i);
+    }
+
     return 0;
 }

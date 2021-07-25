@@ -5,19 +5,20 @@
 #define MBR_SIZE 512
 #define ROW 16
 
-struct part_entry{
+#define STYLE_BOLD  "\033[1m"
+#define STYLE_NO_BOLD  "\033[22m"
+
+struct chs {
+    uint8_t h; /* 8 head bits */
+    uint8_t s; /* 2 higher cylinder bits + 6 sector bits */
+    uint8_t c; /* 8 lower cylinder bits */
+};
+
+struct part_entry {
     uint8_t part_status;
-    struct {
-        uint8_t h;
-        uint8_t s;
-        uint8_t c;
-    } chs_first; /* CHS of the first sector in partition */
+    struct chs chs_first;
     uint8_t part_type;
-    struct {
-        uint8_t h;
-        uint8_t s;
-        uint8_t c;
-    } chs_last; /* CHS of the last sector in partition */
+    struct chs chs_last; 
     uint32_t lba_first; /* LBA of the first partition sector (LE) */
     uint32_t sectors_count; /* number of sectors in the partition (LE) */
 };
