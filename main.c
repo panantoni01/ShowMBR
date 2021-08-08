@@ -24,6 +24,8 @@ int main(int argc, char* argv[]) {
     else
         printf("\nCorrect boot signature: [%02x %02x]\n", mbr_content[510], mbr_content[511]);
 
+    print_disass(mbr_content);
+
     for (int i = 0; i <= 3; i++) {
         putchar('\n');
         print_part(mbr_content, i);

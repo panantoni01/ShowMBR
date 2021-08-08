@@ -64,3 +64,32 @@ void print_part(uint8_t buffer[MBR_SIZE], int num) {
     printf("Number of sectors in the partition: 0x%08x = %u\n", 
         le32toh(curr_entry->sectors_count), le32toh(curr_entry->sectors_count));
 }
+
+void print_disass(uint8_t buffer[MBR_SIZE]) {
+    /* Create a temporary copy of MBR sector in /tmp directory.
+    This makes it possible for `objdump` to work properly */
+    
+    char filename[] = "/tmp/showmbr-XXXXXX";
+    int temp_fd = Mkstemp(filename);
+    Write(temp_fd, buffer, MBR_SIZE);
+    
+    printf(STYLE_BOLD);
+    printf("\nDisassembly of bootstrap code:\n");
+    printf(STYLE_NO_BOLD);
+    Fflush(stdout);
+
+    if (!Fork()) { /* Child process */
+        char* const objdump_argv[] = {"objdump", "-D", 
+        "-b", "binary", 
+        "-m", "i386",
+        "-M", "addr16,intel",
+        filename, NULL };
+        Execv("/usr/bin/objdump", objdump_argv);
+    }
+    else {
+        Wait(NULL);
+    }   
+
+    Close(temp_fd);
+    Unlink(filename);
+}

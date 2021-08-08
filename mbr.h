@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdint.h>
 #include<endian.h>
+#include<stdlib.h>
 
 #define MBR_SIZE 512
 #define ROW 16
@@ -25,3 +26,4 @@ struct part_entry {
 
 void hexdump_MBR(uint8_t buffer[MBR_SIZE]);
 void print_part(uint8_t buffer[MBR_SIZE], int num);
+void print_disass(uint8_t buffer[MBR_SIZE]);
