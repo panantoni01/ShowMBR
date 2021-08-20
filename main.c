@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdint.h>
@@ -17,15 +18,15 @@ int main(int argc, char* argv[]) {
     Read(fd, mbr_content, 512); 
     Close(fd);
     
+    /* The executable should be installed with SUID flag -
+    root privileges are needed to read from block devices. 
+    Having read the MBR sector from a block device, there is 
+    no longer need to maintain these privileges. */
+    Setuid(getuid());
+
     hexdump_MBR(mbr_content);
-    
-    if (mbr_content[510] != 0x55 || mbr_content[511] != 0xAA)
-        printf("\nWARNING: incorrect boot signature: [%02x %02x]\n", mbr_content[510], mbr_content[511]);
-    else
-        printf("\nCorrect boot signature: [%02x %02x]\n", mbr_content[510], mbr_content[511]);
-
+    print_signatures(mbr_content);
     print_disass(mbr_content);
-
     for (int i = 0; i <= 3; i++) {
         putchar('\n');
         print_part(mbr_content, i);

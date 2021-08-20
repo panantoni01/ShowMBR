@@ -25,5 +25,6 @@ struct part_entry {
 };
 
 void hexdump_MBR(uint8_t buffer[MBR_SIZE]);
+void print_signatures(uint8_t buffer[MBR_SIZE]);
 void print_part(uint8_t buffer[MBR_SIZE], int num);
 void print_disass(uint8_t buffer[MBR_SIZE]);

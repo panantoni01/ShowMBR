@@ -8,8 +8,7 @@
 void hexdump_MBR(uint8_t buffer[MBR_SIZE]) {
     for (int i = 0; i < MBR_SIZE/ROW; i++) {
         printf("%08x  ", i*ROW);
-        char printable[17]; 
-        printable[16] = '\0';
+        char printable[17] = { [16] = '\0' };
         for (int j = 0; j < ROW; j++) {
             printf("%02x ", buffer[i*ROW + j]);
             if (buffer[i*ROW + j] <= 125 && buffer[i*ROW + j] >= 32)
@@ -19,6 +18,29 @@ void hexdump_MBR(uint8_t buffer[MBR_SIZE]) {
         }
         printf(" |%s|\n", printable);
     }
+}
+
+void print_signatures(uint8_t buffer[MBR_SIZE]) {
+    putchar('\n');
+    printf(STYLE_BOLD);
+    printf("Disk signatures etc:\n");
+    printf(STYLE_NO_BOLD);
+    
+    if (buffer[510] != 0x55 || buffer[511] != 0xAA)
+        printf("WARNING: incorrect boot signature: [%02x %02x]\n", buffer[510], buffer[511]);
+    else
+        printf("Correct boot signature: [%02x %02x]\n", buffer[510], buffer[511]);
+
+    uint32_t disk_uuid = le32toh(*((uint32_t *)(buffer+440)));
+    printf("Disk UUID (NT Drive Serial Number): 0x%x\n", disk_uuid);
+
+    if (buffer[444] == 0 && buffer[445] == 0)
+        printf("Permissions: read and write\n");
+    else if (buffer[444] == 0x5A && buffer[445] == 0x5A)
+        printf("Permissions: read only\n");
+    else
+        printf("WARNING: Invalid permissions\n");
+
 }
 
 static void print_chs(struct chs* chs_struct) {
@@ -78,11 +100,14 @@ void print_disass(uint8_t buffer[MBR_SIZE]) {
     printf(STYLE_NO_BOLD);
     Fflush(stdout);
 
+    Setuid(getuid()); /* just in case... */
+    
     if (!Fork()) { /* Child process */
         char* const objdump_argv[] = {"objdump", "-D", 
         "-b", "binary", 
         "-m", "i386",
-        "-M", "addr16,intel",
+        "-M", "addr16,data16,intel",
+        "--stop-address", "440", /* 440 = 0x1B8 */
         filename, NULL };
         Execv("/usr/bin/objdump", objdump_argv);
     }
