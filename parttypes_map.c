@@ -1,6 +1,6 @@
 #include"parttypes_map.h"
 
-/* TODO: replace this with data from
+/*  taken from:
     https://searchcode.com/file/62142966/usr/src/cmd/fdisk/fdisk.c/ */
 static char *part_map[256] = {
     "Empty", /* 0 */
