@@ -22,9 +22,7 @@ void hexdump_MBR(uint8_t buffer[MBR_SIZE]) {
 
 void print_signatures(uint8_t buffer[MBR_SIZE]) {
     putchar('\n');
-    printf(STYLE_BOLD);
-    printf("Disk signatures etc:\n");
-    printf(STYLE_NO_BOLD);
+    print_bold("Disk signatures etc:\n");
     
     if (buffer[510] != 0x55 || buffer[511] != 0xAA)
         printf("WARNING: incorrect boot signature: [%02x %02x]\n", buffer[510], buffer[511]);
@@ -62,9 +60,7 @@ void print_part(uint8_t buffer[MBR_SIZE], int num) {
     const int part_entry_addr = 510 - (4 - num) * sizeof(struct part_entry);
     struct part_entry* curr_entry = (struct part_entry*)(buffer + part_entry_addr);
    
-    printf(STYLE_BOLD);
-    printf("Partition no. %d:\n", num);
-    printf(STYLE_NO_BOLD);
+    print_bold("Partition no. %d:\n", num);
 
     printf("Boot flag is 0x%02x - ", (int)curr_entry->part_status);
     if (curr_entry->part_status == 0x80)
@@ -95,10 +91,7 @@ void print_disass(uint8_t buffer[MBR_SIZE]) {
     int temp_fd = Mkstemp(filename);
     Write(temp_fd, buffer, MBR_SIZE);
     
-    printf(STYLE_BOLD);
-    printf("\nDisassembly of bootstrap code:\n");
-    printf(STYLE_NO_BOLD);
-    Fflush(stdout);
+    print_bold("\nDisassembly of bootstrap code:\n");
 
     Setuid(getuid()); /* just in case... */
     

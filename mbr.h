@@ -9,6 +9,12 @@
 #define STYLE_BOLD  "\033[1m"
 #define STYLE_NO_BOLD  "\033[22m"
 
+#define print_bold(...) ({ \
+    printf(STYLE_BOLD); \
+    printf(__VA_ARGS__); \
+    printf(STYLE_NO_BOLD); \
+})
+
 struct chs {
     uint8_t h; /* 8 head bits */
     uint8_t s; /* 2 higher cylinder bits + 6 sector bits */
