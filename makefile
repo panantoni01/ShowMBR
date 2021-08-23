@@ -1,20 +1,35 @@
-CC = gcc
-CFLAGS = -std=c17 -Wall -Wextra
-TARGET = showmbr
+CC=gcc
+CPP=cpp
+CFLAGS=-std=c17 -Wall -Wextra -pedantic
 
-$(TARGET): main.o mbr.o parttypes_map.o wrappers.o
+SRCDIR=src
+BUILDDIR=build
+$(shell mkdir -p $(BUILDDIR))
+
+TARGET=showmbr
+
+SRC=$(wildcard $(SRCDIR)/*.c)
+OBJ=$(SRC:$(SRCDIR)/%.c=$(BUILDDIR)/%.o)
+DEP=$(SRC:$(SRCDIR)/%.c=$(BUILDDIR)/%.d)
+
+$(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
-main.o: main.c
+-include $(DEP)
 
-mbr.o: mbr.c mbr.h
-
-parttypes_map.o: parttypes_map.c parttypes_map.h
-
-wrappers.o: wrappers.c wrappers.h
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) -MM $< -MQ $(BUILDDIR)/$*.o -MF $(BUILDDIR)/$*.d
+	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	rm -f *.o
+	@rm -rf $(BUILDDIR) $(TARGET)
 
-distclean:
-	rm -f *.o $(TARGET)
+BINDIR=/usr/local/bin
+
+install: $(TARGET)
+	install -m 4755 -o root $(TARGET) $(BINDIR)
+
+uninstall:
+	rm $(BINDIR)/$(TARGET)
+
+.PHONY: all clean install uninstall
