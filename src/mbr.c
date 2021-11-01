@@ -4,7 +4,6 @@
 #include"mbr.h"
 #include"parttypes_map.h" 
 
-
 void hexdump_MBR(uint8_t buffer[MBR_SIZE]) {
     for (int i = 0; i < MBR_SIZE/ROW; i++) {
         printf("%08x  ", i*ROW);

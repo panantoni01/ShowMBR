@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
                 disassemble = 1;
                 break;
             default:
-                fprintf(stderr, "usage: %s [-h] [-d] [-e] <block_dev>\n", argv[0]);
+                fprintf(stderr, "usage: %s [-h] [-d] <block_dev>\n", argv[0]);
                 exit(1);
         }
     }

@@ -8,7 +8,7 @@
 #include<unistd.h>
 #include<stdlib.h>
 #include<sys/types.h>
-#include<sys/wait.h>
+#include<sys/wait.h> 
 
 int Open(const char *pathname, int flags);
 int Close(int fd);

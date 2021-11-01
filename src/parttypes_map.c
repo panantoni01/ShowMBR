@@ -259,7 +259,7 @@ static char *part_map[256] = {
     "Linux raid autodetect", /* 253 */
     "NT Disk Administrator hidden", /* 254 */
     "Xenix Bad Block Table" /* 255 */
-};
+}; 
 
 char* find_parttype_by_hex(uint8_t hex) {
     if (part_map[hex] != NULL)
