@@ -5,6 +5,7 @@
 #include<stdint.h>
 #include<endian.h>
 #include<stdlib.h>
+#include<assert.h>
 
 #define MBR_SIZE 512
 #define ROW 16

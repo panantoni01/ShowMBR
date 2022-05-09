@@ -7,10 +7,10 @@
 #include"mbr.h"
 
 int main(int argc, char* argv[]) {
-    int hexdump = 0;
-    int disassemble = 0;
+    uint8_t mbr_content[MBR_SIZE];
+    int fd;
+    int hexdump = 0, disassemble = 0, opt;
 
-    int opt;
     while ((opt = getopt(argc, argv, "hd")) != -1) {
         switch (opt) {
             case 'h':
@@ -30,10 +30,8 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    char* filename = argv[optind];
-    int fd = Open(filename, O_RDONLY);
-    uint8_t mbr_content[512];
-    Read(fd, mbr_content, 512); 
+    fd = Open(argv[optind], O_RDONLY);
+    Read(fd, mbr_content, MBR_SIZE);
     Close(fd);
     
     /* The executable should be installed with SUID flag -

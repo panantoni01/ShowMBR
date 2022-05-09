@@ -7,33 +7,35 @@
 void hexdump_MBR(uint8_t buffer[MBR_SIZE]) {
     for (int i = 0; i < MBR_SIZE/ROW; i++) {
         printf("%08x  ", i*ROW);
-        char printable[17] = { [16] = '\0' };
-        for (int j = 0; j < ROW; j++) {
+        for (int j = 0; j < ROW; j++) 
             printf("%02x ", buffer[i*ROW + j]);
+        printf(" |");
+        for (int j = 0; j < ROW; j++)
             if (buffer[i*ROW + j] <= 125 && buffer[i*ROW + j] >= 32)
-                printable[j] = buffer[i*ROW + j];
+                putchar(buffer[i*ROW + j]);
             else
-                printable[j] = '.'; 
-        }
-        printf(" |%s|\n", printable);
+                putchar('.');
+        printf("|\n");
     }
 }
 
 void print_signatures(uint8_t buffer[MBR_SIZE]) {
-    putchar('\n');
-    print_bold("Disk signatures etc:\n");
-    
-    if (buffer[510] != 0x55 || buffer[511] != 0xAA)
-        printf("WARNING: incorrect boot signature: [%02x %02x]\n", buffer[510], buffer[511]);
-    else
-        printf("Correct boot signature: [%02x %02x]\n", buffer[510], buffer[511]);
-
+    uint8_t  boot_sig[2] = { buffer[510], buffer[511] };
     uint32_t disk_uuid = le32toh(*((uint32_t *)(buffer+440)));
+    uint8_t  perm_sig[2] = { buffer[444], buffer[445] };
+    
+    print_bold("\nDisk signatures etc:\n");
+    
+    if (boot_sig[0] != 0x55 || boot_sig[1] != 0xAA)
+        printf("WARNING: incorrect boot signature: [%02x %02x]\n", boot_sig[0], boot_sig[1]);
+    else
+        printf("Correct boot signature: [%02x %02x]\n", boot_sig[0], boot_sig[1]);
+
     printf("Disk UUID (NT Drive Serial Number): 0x%x\n", disk_uuid);
 
-    if (buffer[444] == 0 && buffer[445] == 0)
+    if (perm_sig[0] == 0 && perm_sig[1] == 0)
         printf("Permissions: read and write\n");
-    else if (buffer[444] == 0x5A && buffer[445] == 0x5A)
+    else if (perm_sig[0] == 0x5A && perm_sig[1] == 0x5A)
         printf("Permissions: read only\n");
     else
         printf("WARNING: Invalid permissions\n");
@@ -50,10 +52,8 @@ static void print_chs(struct chs* chs_struct) {
 }
 
 void print_part(uint8_t buffer[MBR_SIZE], int num) {
-    if (num < 0 || num > 3) { /* we have 4 partitions: part0 ... part3 */
-        fprintf(stderr, "ERROR: wrong partition number\n");
-        exit(1);
-    }
+    /* we have 4 partitions: part0 ... part3 */
+    assert(num >= 0 && num <= 3);
 
     /* index (in 'buffer' array) of the first byte of partition no. `num` */
     const int part_entry_addr = 510 - (4 - num) * sizeof(struct part_entry);
